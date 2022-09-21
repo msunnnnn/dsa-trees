@@ -21,26 +21,13 @@ class BinaryTree {
     // queue (breadth search) check if second layer has children
     //  add counter for each layer
     // if it doesn't have children return counter
-    if(!node){
-      return 0
+    if (!node) {
+      return 0;
     }
-    let counter = 1
-    // let queue = [node]
+    let counter = 1;
 
-    // while(queue.length){
-    //   counter++
-    //   let current = queue.shift()
-    //   if (!current.children){
-    //     return counter
-    //   }
 
-    //   for (let child of current.children){
-    //     queue.push(child)
-    //   }
-
-    // }
-
-    return Math.min(this.minDepth(node.left), this.minDepth(node.right)) + counter
+    return Math.min(this.minDepth(node.left), this.minDepth(node.right)) + counter;
 
 
 
@@ -51,11 +38,11 @@ class BinaryTree {
 
   maxDepth(node = this.root) {
     //if a has children -> look into c
-    if(!node){
-      return 0
+    if (!node) {
+      return 0;
     }
-    let counter = 1
-    return Math.max(this.maxDepth(node.left), this.maxDepth(node.right)) + counter
+    let counter = 1;
+    return Math.max(this.maxDepth(node.left), this.maxDepth(node.right)) + counter;
 
   }
 
@@ -63,18 +50,64 @@ class BinaryTree {
   /** nextLarger(lowerBound): return the smallest value in the tree
    * which is larger than lowerBound. Return null if no such value exists. */
 
-  nextLarger(lowerBound, node = this.root) {
-    if(!node){
-      return null
+
+
+  // this could be done with recursion, a stack, or a queue --- a queue would
+  // be a poor choice unless you use a LinkedList, since a JS array is a poor
+  // choice for a queue. For variety, we'll use a stack rather than recursion.
+
+  nextLarger(lowerBound) {
+    if (!this.root) return null;
+
+    let stack = [this.root];
+    let closest = Infinity;
+
+    while (stack.length) {
+      let node = stack.pop();
+
+      if (node.val > lowerBound && node.val < closest) closest = node.val;
+
+      if (node.left) stack.push(node.left);
+      if (node.right) stack.push(node.right);
     }
 
+    return closest === Infinity ? null : closest;
   }
+
 
   /** Further study!
    * areCousins(node1, node2): determine whether two nodes are cousins
    * (i.e. are at the same level but have different parents. ) */
 
   areCousins(node1, node2) {
+    function findLevelAndParent(
+      nodeToFind,
+      currentNode,
+      level = 0,
+      data = { level: 0, parent: null }
+    ) {
+      if (data.parent) return data;
+      if (currentNode.left === nodeToFind || currentNode.right === nodeToFind) {
+        data.level = level + 1;
+        data.parent = currentNode;
+      }
+      if (currentNode.left) {
+        findLevelAndParent(nodeToFind, currentNode.left, level + 1, data);
+      }
+      if (currentNode.right) {
+        findLevelAndParent(nodeToFind, currentNode.right, level + 1, data);
+      }
+      return data;
+    }
+
+    let node1Info = findLevelAndParent(node1, this.root);
+    let node2Info = findLevelAndParent(node2, this.root);
+
+    let sameLevel =
+      node1Info && node2Info && node1Info.level === node2Info.level;
+    let differentParents =
+      node1Info && node2Info && node1Info.parent !== node2Info.parent;
+    return sameLevel && differentParents;
   }
 
 }
